@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FindIt | School Lost & Found</title>
+<style>
+:root{--navy:#19365b;--blue:#eaf0f8;--bg:#f5f7fa;--white:#fff;--text:#263445;--muted:#788596;--line:#e5e9ef;--green:#21865b;--red:#c94b4b;--orange:#b87920}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}button,input,select,textarea{font:inherit}button{cursor:pointer}
+.layout{min-height:100vh}.sidebar{position:fixed;inset:0 auto 0 0;width:235px;background:#fff;border-right:1px solid var(--line);padding:24px 17px;z-index:5}
+.logo{font-size:23px;font-weight:800;color:var(--navy);padding:4px 10px 8px}.logo span{color:#6592c4}.school{font-size:11px;color:var(--muted);padding:0 10px 28px}
+.nav-label{font-size:10px;color:var(--muted);letter-spacing:1px;padding:10px;text-transform:uppercase}
+.nav-btn{display:block;width:100%;border:0;background:none;text-align:left;padding:13px 12px;border-radius:8px;color:#536174;margin:3px 0;font-size:14px}
+.nav-btn:hover,.nav-btn.active{background:var(--blue);color:var(--navy);font-weight:bold}
+.sidebar-note{position:absolute;bottom:20px;left:18px;right:18px;border-top:1px solid var(--line);padding:16px 8px;color:var(--muted);font-size:11px;line-height:1.5}
+.main{margin-left:235px;padding:28px 34px;max-width:1600px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:26px}
+.topbar h1{font-size:24px;color:var(--navy);margin:0}.topbar p{font-size:13px;color:var(--muted);margin:6px 0 0}
+.admin-pill{background:#eaf5ef;color:var(--green);padding:9px 13px;border-radius:20px;font-size:12px}
+.page{display:none}.page.active{display:block}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:22px}
+.stat,.panel{background:#fff;border:1px solid var(--line);border-radius:12px}
+.stat{padding:19px}.stat p{margin:0;color:var(--muted);font-size:12px}.stat h2{margin:12px 0 0;color:var(--navy);font-size:28px}
+.panel{padding:21px;margin-bottom:20px}.panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:17px}
+.panel h3{font-size:16px;color:var(--navy);margin:0}.muted{font-size:12px;color:var(--muted)}
+.btn{border:0;border-radius:7px;padding:11px 15px;background:var(--navy);color:white;font-size:12px;font-weight:bold}
+.btn:hover{opacity:.9}.btn.light{background:var(--blue);color:var(--navy)}.btn.good{background:#eaf5ef;color:var(--green)}.btn.danger{background:#fff0f0;color:var(--red)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field{margin-bottom:14px}.field.full{grid-column:1/-1}
+label{display:block;font-size:12px;font-weight:bold;margin-bottom:7px}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);border-radius:7px;background:white;color:var(--text);font-size:13px;outline:none}
+input:focus,select:focus,textarea:focus{border-color:#7294bc}textarea{min-height:85px;resize:vertical}
+.filters{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;margin-bottom:16px}
+.items{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+.item{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
+.item-photo{height:145px;background:#edf1f6;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;overflow:hidden}
+.item-photo img{width:100%;height:100%;object-fit:cover}
+.item-body{padding:14px}.item-body h4{font-size:14px;margin:0 0 8px;color:var(--navy)}
+.item-body p{font-size:12px;color:var(--muted);margin:5px 0;line-height:1.4}
+.tag{display:inline-block;font-size:10px;padding:5px 8px;border-radius:20px;background:var(--blue);color:var(--navy);margin:0 4px 8px 0}
+.tag.lost{background:#fff0f0;color:var(--red)}.tag.found{background:#eaf5ef;color:var(--green)}.tag.claimed{background:#fff4df;color:var(--orange)}
+.item-actions{display:flex;gap:7px;margin-top:12px;flex-wrap:wrap}.item-actions button{padding:8px 10px;font-size:11px}
+table{width:100%;border-collapse:collapse;font-size:12px}th,td{text-align:left;padding:12px 9px;border-bottom:1px solid var(--line)}th{color:var(--muted);font-weight:bold}
+.empty{text-align:center;padding:35px;color:var(--muted);font-size:13px;grid-column:1/-1}
+.notice{background:#f0f5fb;border:1px solid #dce7f4;padding:13px;border-radius:8px;color:#526982;font-size:12px;line-height:1.5;margin-bottom:16px}
+.modal{display:none;position:fixed;inset:0;background:#17253680;z-index:20;align-items:center;justify-content:center;padding:16px}
+.modal.show{display:flex}.modal-box{background:#fff;width:min(540px,100%);max-height:90vh;overflow:auto;border-radius:12px;padding:22px}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.close{border:0;background:none;font-size:23px;color:var(--muted)}
+.toast{position:fixed;bottom:20px;right:20px;background:#19365b;color:white;padding:13px 18px;border-radius:8px;font-size:13px;display:none;z-index:30;box-shadow:0 5px 20px #0002}
+@media(max-width:1050px){.stats{grid-template-columns:repeat(2,1fr)}.items{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.sidebar{position:static;width:100%;height:auto;padding:12px;display:flex;align-items:center;gap:5px;overflow-x:auto}.logo{padding:8px;font-size:20px;white-space:nowrap}.school,.nav-label,.sidebar-note{display:none}.nav-btn{width:auto;white-space:nowrap;padding:10px;font-size:12px}.main{margin:0;padding:20px 14px}.topbar h1{font-size:20px}.stats{gap:9px}.stat{padding:14px}.stat h2{font-size:23px}.items{grid-template-columns:1fr}.filters{grid-template-columns:1fr 1fr}.filters input{grid-column:1/-1}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar">
+  <div>
+    <div class="logo">Find<span>It.</span></div>
+    <div class="school">SCHOOL LOST & FOUND SYSTEM</div>
+  </div>
+  <div class="nav-label">Workspace</div>
+  <button class="nav-btn active" data-page="dashboard">▦ &nbsp; Dashboard</button>
+  <button class="nav-btn" data-page="items">▤ &nbsp; Item Records</button>
+  <button class="nav-btn" data-page="report">＋ &nbsp; Report an Item</button>
+  <button class="nav-btn" data-page="claims">✓ &nbsp; Claim Requests</button>
+  <div class="sidebar-note">FindIt School Management System<br>Organized. Secure. Accessible.</div>
+</aside>
+
+<main class="main">
+<header class="topbar">
+  <div><h1 id="pageTitle">Dashboard</h1><p>Lost and found item monitoring</p></div>
+  <div class="admin-pill">● Administrator View</div>
+</header>
+
+<section class="page active" id="dashboard">
+  <div class="stats">
+    <div class="stat"><p>Total Reports</p><h2 id="totalCount">0</h2></div>
+    <div class="stat"><p>Lost Items</p><h2 id="lostCount">0</h2></div>
+    <div class="stat"><p>Found Items</p><h2 id="foundCount">0</h2></div>
+    <div class="stat"><p>Returned Items</p><h2 id="returnedCount">0</h2></div>
+  </div>
+  <div class="panel">
+    <div class="panel-head"><h3>Recent Reports</h3><button class="btn light" onclick="showPage('items')">View all records</button></div>
+    <div id="recentItems" class="items"></div>
+  </div>
+  <div class="notice">Demonstration version: records are stored in this browser using local storage. For actual school deployment, connect the system to a secure database and implement user authentication and access controls.</div>
+</section>
+
+<section class="page" id="items">
+  <div class="panel">
+    <div class="panel-head"><h3>Item Records</h3><button class="btn" onclick="showPage('report')">＋ Add Report</button></div>
+    <div class="filters">
+      <input id="searchInput" placeholder="Search item name or description..." oninput="renderItems()">
+      <select id="typeFilter" onchange="renderItems()"><option value="">All report types</option><option>Lost</option><option>Found</option></select>
+      <select id="statusFilter" onchange="renderItems()"><option value="">All statuses</option><option>Pending</option><option>Found</option><option>Claimed</option><option>Returned</option></select>
+    </div>
+    <div id="allItems" class="items"></div>
+  </div>
+</section>
+
+<section class="page" id="report">
+  <div class="panel">
+    <div class="panel-head"><h3>Submit an Item Report</h3><span class="muted">Complete the details below</span></div>
+    <form id="reportForm">
+      <div class="form-grid">
+        <div class="field"><label for="reportType">Report Type *</label><select id="reportType" required><option value="">Select type</option><option>Lost</option><option>Found</option></select></div>
+        <div class="field"><label for="itemName">Item Name *</label><input id="itemName" required placeholder="e.g. Black wallet"></div>
+        <div class="field"><label for="category">Category *</label><select id="category" required><option value="">Select category</option><option>Electronics</option><option>Clothing</option><option>School Supplies</option><option>Accessories</option><option>Personal Belongings</option><option>Documents</option><option>Other</option></select></div>
+        <div class="field"><label for="itemDate">Date Lost/Found *</label><input id="itemDate" type="date" required></div>
+        <div class="field"><label for="location">Location *</label><select id="location" required><option value="">Select location</option><option>Classroom</option><option>Library</option><option>Canteen</option><option>Gymnasium</option><option>School Grounds</option><option>Computer Laboratory</option><option>Office</option><option value="Others">Others</option></select></div>
+        <div class="field" id="otherLocationField" style="display:none"><label for="otherLocation">Specify Location *</label><input id="otherLocation" placeholder="Enter the exact location"></div>
+        <div class="field"><label for="reporter">Reporter Name *</label><input id="reporter" required placeholder="Your full name"></div>
+        <div class="field"><label for="contact">Contact Information *</label><input id="contact" required placeholder="School email or contact number"></div>
+        <div class="field full"><label for="description">Item Description *</label><textarea id="description" required placeholder="Describe identifying features, color, brand, or other details."></textarea></div>
+        <div class="field full"><label for="photo">Item Photo (optional)</label><input id="photo" type="file" accept="image/*"></div>
+      </div>
+      <button class="btn" type="submit">Submit Report</button>
+      <button class="btn light" type="reset">Clear Form</button>
+    </form>
+  </div>
+</section>
+
+<section class="page" id="claims">
+  <div class="panel">
+    <div class="panel-head"><h3>Claim Requests</h3><span class="muted">Review and update item claims</span></div>
+    <div style="overflow-x:auto">
+      <table><thead><tr><th>Item</th><th>Reporter</th><th>Report Type</th><th>Status</th><th>Action</th></tr></thead><tbody id="claimRows"></tbody></table>
+    </div>
+  </div>
+</section>
+</main>
+</div>
+
+<div class="modal" id="claimModal">
+  <div class="modal-box">
+    <div class="modal-head"><h3>Submit Claim Request</h3><button class="close" onclick="closeClaim()">×</button></div>
+    <form id="claimForm">
+      <input type="hidden" id="claimItemId">
+      <div class="field"><label for="claimant">Your Name *</label><input id="claimant" required></div>
+      <div class="field"><label for="claimContact">Contact Information *</label><input id="claimContact" required></div>
+      <div class="field"><label for="claimProof">How can you identify this item? *</label><textarea id="claimProof" required placeholder="Provide details to help verify ownership."></textarea></div>
+      <button class="btn" type="submit">Submit Claim</button>
+    </form>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = "findit_school_records_v1";
+let records = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+let claims = JSON.parse(localStorage.getItem(STORAGE_KEY + "_claims") || "[]");
+
+function saveData(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+  localStorage.setItem(STORAGE_KEY + "_claims", JSON.stringify(claims));
+}
+function notify(message){
+  const toast=document.getElementById("toast");
+  toast.textContent=message; toast.style.display="block";
+  setTimeout(()=>toast.style.display="none",2600);
+}
+function showPage(page){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.getElementById(page).classList.add("active");
+  document.querySelectorAll(".nav-btn").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
+  const titles={dashboard:"Dashboard",items:"Item Records",report:"Report an Item",claims:"Claim Requests"};
+  document.getElementById("pageTitle").textContent=titles[page];
+  renderAll();
+}
+document.querySelectorAll(".nav-btn").forEach(btn=>btn.addEventListener("click",()=>showPage(btn.dataset.page)));
+
+document.getElementById("location").addEventListener("change",function(){
+  const field=document.getElementById("otherLocationField");
+  const input=document.getElementById("otherLocation");
+  field.style.display=this.value==="Others"?"block":"none";
+  input.required=this.value==="Others";
+});
+
+document.getElementById("reportForm").addEventListener("reset",()=>{
+  setTimeout(()=>{document.getElementById("otherLocationField").style.display="none";document.getElementById("otherLocation").required=false;},0);
+});
+
+document.getElementById("reportForm").addEventListener("submit",function(e){
+  e.preventDefault();
+  const file=document.getElementById("photo").files[0];
+  const saveRecord=(photo)=>{
+    const location=document.getElementById("location").value==="Others"
+      ? document.getElementById("otherLocation").value.trim()
+      : document.getElementById("location").value;
+    const record={
+      id:Date.now(),type:document.getElementById("reportType").value,
+      name:document.getElementById("itemName").value.trim(),
+      category:document.getElementById("category").value,
+      date:document.getElementById("itemDate").value,location,
+      reporter:document.getElementById("reporter").value.trim(),
+      contact:document.getElementById("contact").value.trim(),
+      description:document.getElementById("description").value.trim(),
+      photo:photo||"",status:"Pending",claimStatus:""
+    };
+    records.unshift(record);saveData();this.reset();showPage("items");notify("Item report submitted successfully.");
+  };
+  if(file){
+    if(file.size>1500000){notify("Please select an image smaller than 1.5 MB.");return;}
+    const reader=new FileReader();
+    reader.onload=()=>saveRecord(reader.result);
+    reader.readAsDataURL(file);
+  }else saveRecord("");
+});
+
+function safe(value){
+  return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function card(record){
+  const photo=record.photo?`<img src="${record.photo}" alt="Item photo">`:"No photo provided";
+  const typeClass=record.type.toLowerCase();
+  const statusClass=record.status==="Claimed"||record.status==="Returned"?"claimed":"";
+  return `<article class="item">
+    <div class="item-photo">${photo}</div>
+    <div class="item-body">
+      <span class="tag ${typeClass}">${safe(record.type)} Item</span>
+      <span class="tag ${statusClass}">${safe(record.status)}</span>
+      <h4>${safe(record.name)}</h4>
+      <p><b>Category:</b> ${safe(record.category)}</p>
+      <p><b>Location:</b> ${safe(record.location)}</p>
+      <p><b>Date:</b> ${safe(record.date)}</p>
+      <p>${safe(record.description)}</p>
+      <div class="item-actions">
+        ${record.type==="Found"&&record.status!=="Returned"?`<button class="btn good" onclick="openClaim(${record.id})">Claim item</button>`:""}
+        <button class="btn light" onclick="viewDetails(${record.id})">Details</button>
+        <button class="btn danger" onclick="deleteRecord(${record.id})">Delete</button>
+      </div>
+    </div>
+  </article>`;
+}
+function renderItems(){
+  const q=(document.getElementById("searchInput")?.value||"").toLowerCase();
+  const type=document.getElementById("typeFilter")?.value||"";
+  const status=document.getElementById("statusFilter")?.value||"";
+  const filtered=records.filter(r=>(r.name+" "+r.description+" "+r.location).toLowerCase().includes(q)&&(!type||r.type===type)&&(!status||r.status===status));
+  document.getElementById("allItems").innerHTML=filtered.length?filtered.map(card).join(""):'<div class="empty">No matching records found.</div>';
+}
+function renderDashboard(){
+  document.getElementById("totalCount").textContent=records.length;
+  document.getElementById("lostCount").textContent=records.filter(r=>r.type==="Lost").length;
+  document.getElementById("foundCount").textContent=records.filter(r=>r.type==="Found").length;
+  document.getElementById("returnedCount").textContent=records.filter(r=>r.status==="Returned").length;
+  const recent=records.slice(0,3);
+  document.getElementById("recentItems").innerHTML=recent.length?recent.map(card).join(""):'<div class="empty">No reports yet. Submit the first item report.</div>';
+}
+function renderClaims(){
+  const body=document.getElementById("claimRows");
+  body.innerHTML=claims.length?claims.map(c=>{
+    const r=records.find(x=>x.id===c.itemId);
+    return `<tr><td>${safe(r?.name||"Deleted item")}</td><td>${safe(c.name)}</td><td>${safe(r?.type||"—")}</td><td>${safe(c.status)}</td><td>${c.status==="Pending"?`<button class="btn good" onclick="updateClaim(${c.id},'Approved')">Approve</button> <button class="btn danger" onclick="updateClaim(${c.id},'Rejected')">Reject</button>`:"—"}</td></tr>`;
+  }).join(""):'<tr><td colspan="5" class="empty">No claim requests submitted.</td></tr>';
+}
+function renderAll(){renderDashboard();renderItems();renderClaims();}
+function openClaim(id){
+  document.getElementById("claimItemId").value=id;
+  document.getElementById("claimModal").classList.add("show");
+}
+function closeClaim(){document.getElementById("claimModal").classList.remove("show");}
+document.getElementById("claimForm").addEventListener("submit",function(e){
+  e.preventDefault();
+  const itemId=Number(document.getElementById("claimItemId").value);
+  const record=records.find(r=>r.id===itemId);
+  if(!record){notify("Item record not found.");return;}
+  claims.unshift({id:Date.now(),itemId,name:document.getElementById("claimant").value.trim(),contact:document.getElementById("claimContact").value.trim(),proof:document.getElementById("claimProof").value.trim(),status:"Pending"});
+  record.claimStatus="Pending";saveData();this.reset();closeClaim();renderAll();notify("Claim request submitted.");
+});
+function updateClaim(id,status){
+  const claim=claims.find(c=>c.id===id);
+  if(!claim)return;
+  claim.status=status;
+  const record=records.find(r=>r.id===claim.itemId);
+  if(record&&status==="Approved")record.status="Returned";
+  saveData();renderAll();notify("Claim request "+status.toLowerCase()+".");
+}
+function viewDetails(id){
+  const r=records.find(x=>x.id===id);if(!r)return;
+  alert(`ITEM DETAILS\n\n${r.name}\nType: ${r.type}\nCategory: ${r.category}\nDate: ${r.date}\nLocation: ${r.location}\nReporter: ${r.reporter}\nContact: ${r.contact}\nStatus: ${r.status}\n\nDescription:\n${r.description}`);
+}
+function deleteRecord(id){
+  if(!confirm("Delete this item record?"))return;
+  records=records.filter(r=>r.id!==id);
+  saveData();renderAll();notify("Record deleted.");
+}
+renderAll();
+</script>
+</body>
+</html>
